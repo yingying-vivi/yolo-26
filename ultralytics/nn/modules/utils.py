@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.init import uniform_
-from .block import C3Star
 
 __all__ = "inverse_sigmoid", "multi_scale_deformable_attn_pytorch"
 
