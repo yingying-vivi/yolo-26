@@ -37,8 +37,7 @@ __all__ = (
     "C2fPSA",
     "C3Ghost",
     "C3k2",
-    "C3Star"
-    "C3x",
+    "C3StarC3x",
     "CBFuse",
     "CBLinear",
     "ContrastiveHead",
@@ -319,11 +318,11 @@ class C2f(nn.Module):
         y.extend(m(y[-1]) for m in self.m)
         return self.cv2(torch.cat(y, 1))
 
-'''add starblock'''
+
+"""add starblock"""
 
 
 class C3Star(nn.Module):
-
     def __init__(self, c1, c2, n=1):
 
         super().__init__()
@@ -332,9 +331,7 @@ class C3Star(nn.Module):
         self.cv1 = Conv(c1, c2, 1, 1)
 
         # StarBlock 堆叠
-        self.m = nn.Sequential(
-            *[StarBlock(c2) for _ in range(n)]
-        )
+        self.m = nn.Sequential(*[StarBlock(c2) for _ in range(n)])
 
         # ⭐ 新增：特征对齐 1×1 Conv
         self.align = Conv(c2, c2, 1, 1)
@@ -349,6 +346,7 @@ class C3Star(nn.Module):
         x = self.align(x)
 
         return x
+
 
 class C3(nn.Module):
     """CSP Bottleneck with 3 convolutions."""
@@ -513,17 +511,16 @@ class Bottleneck(nn.Module):
 
 
 class StarBlock(nn.Module):
-
     def __init__(self, c):
         super().__init__()
 
         self.dwconv = nn.Conv2d(c, c, 7, 1, 3, groups=c)
         self.bn = nn.BatchNorm2d(c)
 
-        self.f1 = nn.Conv2d(c, 4*c, 1)
-        self.f2 = nn.Conv2d(c, 4*c, 1)
+        self.f1 = nn.Conv2d(c, 4 * c, 1)
+        self.f2 = nn.Conv2d(c, 4 * c, 1)
 
-        self.g = nn.Conv2d(4*c, c, 1)
+        self.g = nn.Conv2d(4 * c, c, 1)
 
         self.dwconv2 = nn.Conv2d(c, c, 7, 1, 3, groups=c)
 

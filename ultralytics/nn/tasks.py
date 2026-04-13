@@ -36,7 +36,6 @@ from ultralytics.nn.modules import (
     C2fPSA,
     C3Ghost,
     C3k2,
-    C3Star,
     C3x,
     CBFuse,
     CBLinear,
@@ -75,7 +74,6 @@ from ultralytics.nn.modules import (
     v10Detect,
 )
 from ultralytics.utils import DEFAULT_CFG_DICT, LOGGER, WINDOWS, YAML, colorstr, emojis
-from ultralytics.nn.modules.scfm import SCFM
 from ultralytics.utils.checks import check_requirements, check_suffix, check_yaml
 from ultralytics.utils.loss import (
     E2ELoss,
@@ -1285,11 +1283,7 @@ class YOLOESegModel(YOLOEModel, SegmentationModel):
             self.criterion = CustomYOLOLoss(total_epochs=300)
 
         if preds is None:
-            preds = self.forward(
-                batch["img"],
-                tpe=batch.get("txt_feats", None),
-                vpe=batch.get("visuals", None)
-            )
+            preds = self.forward(batch["img"], tpe=batch.get("txt_feats", None), vpe=batch.get("visuals", None))
 
             # -------------------------
             # 解析 preds（很关键！）
@@ -1305,11 +1299,11 @@ class YOLOESegModel(YOLOEModel, SegmentationModel):
         gt_cls = batch["cls"]
         gt_masks = batch["masks"]
 
-        loss, loss_items = self.criterion(
+        loss, _loss_items = self.criterion(
             preds=(pred_boxes, pred_cls),
             targets=(gt_boxes, gt_cls),
             masks=(pred_masks, gt_masks),
-            epoch=getattr(self, "epoch", 0)
+            epoch=getattr(self, "epoch", 0),
         )
 
         return loss
