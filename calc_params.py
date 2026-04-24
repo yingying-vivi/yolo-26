@@ -10,5 +10,5 @@ total_params = sum(p.numel() for p in model.parameters())
 trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 # 4️⃣ 打印（转成M更直观）
-print(f"Total Params: {total_params} ({total_params/1e6:.2f}M)")
-print(f"Trainable Params: {trainable_params} ({trainable_params/1e6:.2f}M)")
+print(f"Total Params: {total_params} ({total_params / 1e6:.2f}M)")
+print(f"Trainable Params: {trainable_params} ({trainable_params / 1e6:.2f}M)")
