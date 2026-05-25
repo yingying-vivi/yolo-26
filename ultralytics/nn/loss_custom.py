@@ -4,13 +4,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 # -------------------------------
 # 1️⃣ IoU Loss（CIoU）
 # -------------------------------
 def bbox_iou(box1, box2, eps=1e-7):
     # box format: (x1, y1, x2, y2)
-    inter = (torch.min(box1[..., 2:], box2[..., 2:]) -
-             torch.max(box1[..., :2], box2[..., :2])).clamp(0).prod(2)
+    inter = (torch.min(box1[..., 2:], box2[..., 2:]) - torch.max(box1[..., :2], box2[..., :2])).clamp(0).prod(2)
 
     area1 = (box1[..., 2:] - box1[..., :2]).prod(2)
     area2 = (box2[..., 2:] - box2[..., :2]).prod(2)
@@ -31,20 +31,16 @@ def ciou_loss(pred, target):
 # -------------------------------
 def boundary_loss(pred_mask, gt_mask):
     # Sobel边缘提取
-    sobel_x = torch.tensor([[1, 0, -1],
-                            [2, 0, -2],
-                            [1, 0, -1]], dtype=torch.float32).to(pred_mask.device)
+    sobel_x = torch.tensor([[1, 0, -1], [2, 0, -2], [1, 0, -1]], dtype=torch.float32).to(pred_mask.device)
 
     sobel_y = sobel_x.t()
 
     sobel_x = sobel_x.view(1, 1, 3, 3)
     sobel_y = sobel_y.view(1, 1, 3, 3)
 
-    pred_edge = F.conv2d(pred_mask, sobel_x, padding=1) + \
-                F.conv2d(pred_mask, sobel_y, padding=1)
+    pred_edge = F.conv2d(pred_mask, sobel_x, padding=1) + F.conv2d(pred_mask, sobel_y, padding=1)
 
-    gt_edge = F.conv2d(gt_mask, sobel_x, padding=1) + \
-              F.conv2d(gt_mask, sobel_y, padding=1)
+    gt_edge = F.conv2d(gt_mask, sobel_x, padding=1) + F.conv2d(gt_mask, sobel_y, padding=1)
 
     return F.l1_loss(pred_edge, gt_edge)
 
@@ -59,7 +55,7 @@ class FocalLoss(nn.Module):
         self.alpha = alpha
 
     def forward(self, pred, target):
-        bce = F.binary_cross_entropy_with_logits(pred, target, reduction='none')
+        bce = F.binary_cross_entropy_with_logits(pred, target, reduction="none")
         prob = torch.sigmoid(pred)
         pt = target * prob + (1 - target) * (1 - prob)
 
@@ -130,11 +126,6 @@ class CustomYOLOLoss(nn.Module):
         # ----------------
         prog_w = self.prog.weight(epoch)
 
-        total_loss = prog_w * (iou_loss_val + cls_loss) + \
-                     (1 - prog_w) * (iou_loss_val + cls_loss + b_loss)
+        total_loss = prog_w * (iou_loss_val + cls_loss) + (1 - prog_w) * (iou_loss_val + cls_loss + b_loss)
 
-        return total_loss, {
-            "iou": iou_loss_val,
-            "cls": cls_loss,
-            "boundary": b_loss
-        }
+        return total_loss, {"iou": iou_loss_val, "cls": cls_loss, "boundary": b_loss}
