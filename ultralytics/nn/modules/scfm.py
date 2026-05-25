@@ -4,8 +4,7 @@ import torch.nn.functional as F
 
 
 class SCFM(nn.Module):
-    """
-    Spatial-Channel Feature Modulator (SCFM)
+    """Spatial-Channel Feature Modulator (SCFM).
 
     双分支注意力：
     - Spatial Attention（空间）
@@ -13,7 +12,7 @@ class SCFM(nn.Module):
     """
 
     def __init__(self, c1):
-        super(SCFM, self).__init__()
+        super().__init__()
 
         # ===== Spatial Attention =====
         self.spatial_conv = nn.Conv2d(2, 1, kernel_size=3, padding=1, bias=False)
@@ -29,19 +28,14 @@ class SCFM(nn.Module):
         self.act = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        """
-        x: (B, C, H, W)
-        """
-
+        """X: (B, C, H, W)."""
         # ===============================
         # 1️⃣ Spatial Attention Branch
         # ===============================
         max_pool = torch.max(x, dim=1, keepdim=True)[0]
         avg_pool = torch.mean(x, dim=1, keepdim=True)
 
-        spatial_weight = torch.sigmoid(
-            self.spatial_conv(torch.cat([max_pool, avg_pool], dim=1))
-        )
+        spatial_weight = torch.sigmoid(self.spatial_conv(torch.cat([max_pool, avg_pool], dim=1)))
 
         spatial_out = spatial_weight * x
 
